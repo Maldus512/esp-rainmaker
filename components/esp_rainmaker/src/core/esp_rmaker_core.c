@@ -209,6 +209,11 @@ esp_err_t esp_rmaker_report_node_details()
 }
 
 
+void esp_rmaker_fork_skip_wifi(void) {
+    xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_EVENT);
+}
+
+
 static void esp_rmaker_task(void *data)
 {
     ESP_RMAKER_CHECK_HANDLE();

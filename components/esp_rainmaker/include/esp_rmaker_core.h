@@ -705,6 +705,8 @@ char *esp_rmaker_param_get_type(const esp_rmaker_param_t *param);
  */
 esp_err_t esp_rmaker_report_node_details(void);
 
+void esp_rmaker_fork_skip_wifi(void);
+
 #ifdef __cplusplus
 }
 #endif

@@ -22,6 +22,8 @@
 #include <esp_rmaker_console.h>
 #include <esp_rmaker_common_events.h>
 
+#include <app_insights.h>
+
 #include "app_wifi_with_homekit.h"
 #include "app_priv.h"
 
@@ -102,7 +104,7 @@ void app_main()
     }
     ESP_ERROR_CHECK( err );
 
-    /* Initialize Wi-Fi. Note that, this should be called before esp_rmaker_init()
+    /* Initialize Wi-Fi. Note that, this should be called before esp_rmaker_node_init()
      */
     app_wifi_with_homekit_init();
 
@@ -158,6 +160,9 @@ void app_main()
         .server_cert = ESP_RMAKER_OTA_DEFAULT_SERVER_CERT,
     };
     esp_rmaker_ota_enable(&ota_config, OTA_USING_PARAMS);
+
+    /* Enable Insights. Requires CONFIG_ESP_INSIGHTS_ENABLED=y */
+    app_insights_enable();
 
     /* Start the ESP RainMaker Agent */
     esp_rmaker_start();

@@ -26,7 +26,7 @@ before_script:
 - git --version
 # Cloning esp-idf - Started
 - echo Cloning esp-idf - Started
-- git clone --recursive --branch master --depth 1 ${IDF_GIT_PATH}/esp-idf.git
+- git clone --recursive --branch ${IDF_GIT_BRANCH} --depth 1 ${IDF_GIT_PATH}/esp-idf.git
 - cd esp-idf
 - echo Cloning esp-idf - Done
 # Cloning esp-idf - Done
@@ -46,10 +46,24 @@ before_script:
 - echo Building switch app - Started
 - ls
 - cd $CI_PROJECT_DIR/examples/switch
-- echo Running idf.py
+- echo Building for esp32
 - idf.py build
+- idf.py set-target esp32
 - echo Running make
 - rm -rf build/ sdkconfig
+- echo Building for esp32s2
+- idf.py set-target esp32s2
+- idf.py build
+- rm -rf build/ sdkconfig
+- echo Building for esp32c3
+- idf.py set-target esp32c3
+- idf.py build
+- rm -rf build/ sdkconfig
+- echo Building for esp32s3
+- idf.py set-target esp32s3
+- idf.py build
+- rm -rf build/ sdkconfig
+- echo Running make
 - make defconfig
 - make $MAKEFLAGS
 - echo Building switch app - Done
@@ -150,10 +164,10 @@ before_script:
 - echo Building homekit_switch app - Started
 - echo Running idf.py
 - idf.py build
-- echo Running make
-- rm -rf build/ sdkconfig
-- make defconfig
-- make $MAKEFLAGS
+# - echo Running make
+# - rm -rf build/ sdkconfig
+# - make defconfig
+# - make $MAKEFLAGS
 - echo Building homekit_switch app - Done
 # Building homekit_switch app - Done
 # Copying homekit_switch.bin to esp-rainmaker-bins-${CI_JOB_ID}/
@@ -162,7 +176,7 @@ before_script:
 
 build_app:
   stage: build
-  image: $CI_DOCKER_REGISTRY/esp32-ci-env
+  image: $CI_DOCKER_REGISTRY/esp32-ci-env:rainmaker
   tags:
     - build
   artifacts:
@@ -202,7 +216,7 @@ build_app:
   
 build_docs:
     stage: build
-    image: $CI_DOCKER_REGISTRY/esp32-ci-env
+    image: $CI_DOCKER_REGISTRY/esp32-ci-env:rainmaker
     tags:
       - build
     artifacts:
@@ -229,7 +243,7 @@ build_docs:
 
 push_master_to_github:
   stage: deploy
-  image: $CI_DOCKER_REGISTRY/esp32-ci-env
+  image: $CI_DOCKER_REGISTRY/esp32-ci-env:rainmaker
   tags:
     - build
   when: on_success

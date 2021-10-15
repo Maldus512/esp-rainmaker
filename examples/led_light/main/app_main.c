@@ -20,6 +20,7 @@
 #include <esp_rmaker_schedule.h>
 
 #include <app_wifi.h>
+#include <app_insights.h>
 
 #include "app_priv.h"
 
@@ -77,7 +78,7 @@ void app_main()
     }
     ESP_ERROR_CHECK( err );
 
-    /* Initialize Wi-Fi. Note that, this should be called before esp_rmaker_init()
+    /* Initialize Wi-Fi. Note that, this should be called before esp_rmaker_node_init()
      */
     app_wifi_init();
     
@@ -110,14 +111,18 @@ void app_main()
     };
     esp_rmaker_ota_enable(&ota_config, OTA_USING_PARAMS);
 
-    /* Enable scheduling
-     * Please note that you also need to set the timezone for schedules to work correctly.
-     * Simplest option is to use the CONFIG_ESP_RMAKER_DEF_TIMEZONE config option.
-     * Else, you can set the timezone using the API call `esp_rmaker_time_set_timezone("Asia/Shanghai");`
+    /* Enable timezone service which will be require for setting appropriate timezone
+     * from the phone apps for scheduling to work correctly.
      * For more information on the various ways of setting timezone, please check
      * https://rainmaker.espressif.com/docs/time-service.html.
      */
+    esp_rmaker_timezone_service_enable();
+
+    /* Enable scheduling. */
     esp_rmaker_schedule_enable();
+
+    /* Enable Insights. Requires CONFIG_ESP_INSIGHTS_ENABLED=y */
+    app_insights_enable();
 
     /* Start the ESP RainMaker Agent */
     esp_rmaker_start();

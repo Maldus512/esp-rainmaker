@@ -1,5 +1,78 @@
 # Changes
 
+## 24-Aug-2021 (esp_rmaker_user_mapping: Add checks for user id for better security)
+
+This commit adds some logic to detect a reset to factory or a user change during the
+user node association workflow so that the RainMaker cloud can reset any earlier
+mappings if this reset state is reported by the device during user node association.
+
+If an existing, provisioned node is upgraded with a new firmware with this logic enabled,
+it will send a request to cloud to reset the user mapping and so a re-provisioning would be
+required. Moreover, a simple Wi-Fi reset will be treated as a factory reset in the context of
+user node association. A side effect of this would be that the cloud can remove the secondary
+users associated with that node and so, those would have to be added back again.
+All subsequent Wi-Fi/Factory resets and provisioning + user node association would work fine.
+For all new nodes, enabling this logic would have no issues.
+
+Since this change in behavior is a breaking change, the feature has been kept disabled by default.
+However, it is strongly recommended to enable this using CONFIG_ESP_RMAKER_USER_ID_CHECK
+
+## 02-Jul-2021 (esp_insights: Add facility to enable esp_insights in the examples)
+
+This commit introduces a breaking change in compilation, not due to any API change,
+but introduction of new components under components/esp-insights/components.
+You can either choose to include these components in your projects CMakeLists.txt
+as per the standard examples as given here:
+
+```
+set(EXTRA_COMPONENT_DIRS ${RMAKER_PATH}/components ${RMAKER_PATH}/examples/common ${RMAKER_PATH}/components/esp-insights/components)
+```
+
+You will also have to pull in the new esp-insights submodule by executing this command:
+
+```
+git submodule update --init --recursive
+```
+
+Another option is to exclude the common example component (app_insights) that adds these
+components to the dependencies by adding this to your project's CMakeLists.txt:
+
+```
+set(EXCLUDE_COMPONENTS app_insights)
+```
+
+Check out the [esp-insights](https://github.com/espressif/esp-insights) project to understand more about this.
+You can also check the docs [here](https://rainmaker.espressif.com/docs/esp-insights.html) to get started with enabling Insights in ESP RainMaker.
+
+## 28-May-2021 (esp_rmaker_core: Add a system service for reboot/reset)
+
+The reboot/reset API prototypes have changed from
+
+```
+esp_err_t esp_rmaker_reboot(uint8_t seconds);
+esp_err_t esp_rmaker_wifi_reset(uint8_t seconds);
+esp_err_t esp_rmaker_factory_reset(uint8_t seconds);
+```
+To
+
+```
+esp_err_t esp_rmaker_reboot(int8_t seconds);
+esp_err_t esp_rmaker_wifi_reset(int8_t reset_seconds, int8_t reboot_seconds);
+esp_err_t esp_rmaker_factory_reset(int8_t reset_seconds, int8_t reboot_seconds);
+```
+
+- The behavior of `esp_rmaker_reboot()` has changed such that passing a value of 0 would trigger
+an immediate reboot without starting any timer.
+- The `esp_rmaker_wifi_reset()` and `esp_rmaker_factory_reset()` APIs have been modified such that
+they now accept 2 time values. The `reset_seconds` specify the time after which the reset should trigger
+and the `reboot_seconds` specify the time after which the reboot should trigger, after the reset
+was done.
+- `reboot_seconds` is similar to the earlier `seconds` argument, but it allows for 0 and negative values.
+0 indicates that the reboot should happen immediately after reset and negative value indicates that the
+reboot should be skipped.
+
+Please refer the [API documentation](https://docs.espressif.com/projects/esp-rainmaker/en/latest/c-api-reference/rainmaker_common.html#utilities) for additional details.
+
 ## 1-Feb-2021 (esp_rmaker: Moved out some generic modules from esp_rainmaker component)
 
 Some generic code has been moved out of the esp_rainmaker repo and included as submodules at

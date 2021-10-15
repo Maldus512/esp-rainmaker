@@ -17,7 +17,10 @@
 #include <freertos/queue.h>
 #include <json_generator.h>
 #include <esp_rmaker_core.h>
-#define RMAKER_PARAM_FLAG_VALUE_CHANGE   0x01
+
+#define RMAKER_PARAM_FLAG_VALUE_CHANGE   (1 << 0)
+#define RMAKER_PARAM_FLAG_VALUE_NOTIFY   (1 << 1)
+#define ESP_RMAKER_NVS_PART_NAME            "nvs"
 
 typedef enum {
     ESP_RMAKER_STATE_DEINIT = 0,
@@ -26,6 +29,12 @@ typedef enum {
     ESP_RMAKER_STATE_STARTED,
     ESP_RMAKER_STATE_STOP_REQUESTED,
 } esp_rmaker_state_t;
+
+typedef enum {
+    ESP_RMAKER_USER_MAPPING_RESET = 0,
+    ESP_RMAKER_USER_MAPPING_STARTED,
+    ESP_RMAKER_USER_MAPPING_DONE,
+} esp_rmaker_user_mapping_state_t;
 
 typedef struct {
     esp_rmaker_param_val_t min;
@@ -63,6 +72,7 @@ typedef struct esp_rmaker_attr esp_rmaker_attr_t;
 struct esp_rmaker_device {
     char *name;
     char *type;
+    char *subtype;
     esp_rmaker_device_write_cb_t write_cb;
     esp_rmaker_device_read_cb_t read_cb;
     void *priv_data;
@@ -90,8 +100,7 @@ esp_err_t esp_rmaker_report_node_config(void);
 esp_err_t esp_rmaker_report_node_state(void);
 _esp_rmaker_device_t *esp_rmaker_node_get_first_device(const esp_rmaker_node_t *node);
 esp_rmaker_attr_t *esp_rmaker_node_get_first_attribute(const esp_rmaker_node_t *node);
-esp_err_t esp_rmaker_register_for_set_params(void);
-esp_err_t esp_rmaker_report_param_internal(void);
+esp_err_t esp_rmaker_params_mqtt_init(void);
 esp_err_t esp_rmaker_param_get_stored_value(_esp_rmaker_param_t *param, esp_rmaker_param_val_t *val);
 esp_err_t esp_rmaker_param_store_value(_esp_rmaker_param_t *param);
 esp_err_t esp_rmaker_node_delete(const esp_rmaker_node_t *node);
@@ -102,6 +111,8 @@ char *esp_rmaker_get_node_params(void);
 esp_err_t esp_rmaker_handle_set_params(char *data, size_t data_len, esp_rmaker_req_src_t src);
 esp_err_t esp_rmaker_user_mapping_prov_init(void);
 esp_err_t esp_rmaker_user_mapping_prov_deinit(void);
+esp_rmaker_user_mapping_state_t esp_rmaker_user_node_mapping_get_state(void);
+esp_err_t esp_rmaker_user_node_mapping_init(void);
 esp_err_t esp_rmaker_init_local_ctrl_service(void);
 esp_err_t esp_rmaker_start_local_ctrl_service(const char *serv_name);
 static inline esp_err_t esp_rmaker_post_event(esp_rmaker_event_t event_id, void* data, size_t data_size)

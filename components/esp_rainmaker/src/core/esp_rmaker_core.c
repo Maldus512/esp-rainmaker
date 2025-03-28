@@ -39,6 +39,11 @@ ESP_EVENT_DEFINE_BASE(RMAKER_EVENT);
 static const char *TAG = "esp_rmaker_core";
 
 
+void esp_rmaker_fork_skip_wifi(void) {
+    xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_EVENT);
+}
+
+
 #if defined(CONFIG_ESP_RMAKER_SELF_CLAIM) || defined(CONFIG_ESP_RMAKER_ASSISTED_CLAIM)
 #define ESP_RMAKER_CLAIM_ENABLED
 #endif
